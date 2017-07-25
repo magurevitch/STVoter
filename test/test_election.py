@@ -5,15 +5,6 @@ sys.path.append('../')
 from src.election import Election, Ballot
 
 class TestElectionMethods(unittest.TestCase):
-    def testAddBallot(self):
-        election = Election()
-        
-        election.ballot([1,2])
-        
-        self.assertEqual(len(election.ballots), 1,"Adding a ballot works well")
-        self.assertEqual(election.ballots[0].list, [1,2], "Adding a ballot works well")
-        self.assertEqual(election.ballots[0].current(), 1, "Adding a ballot works well")
-
     def testOneMajority(self):
         election = Election()
         
@@ -38,13 +29,15 @@ class TestElectionMethods(unittest.TestCase):
     
         self.assertEqual(winners,[1],"cannot find winner without majority")
         
-    #def testOneTooManyTies(self):
-    #
-    #    election = Election()
-    #    election.ballot([1,2])
-    #    election.ballot([2,1])
+    def testOneTooManyTies(self):
     
-    #    winners = election.runElection(1)
+        election = Election()
+        election.ballot([1,2])
+        election.ballot([2,1])
+    
+        winners = election.runElection(1)
+        
+        self.assertFalse(winners)
         
     def testTwoJustEnoughCandidates(self):
         election = Election()
@@ -57,12 +50,13 @@ class TestElectionMethods(unittest.TestCase):
         
         self.assertEqual(winners, [1,2], "won't choose all available candidates")
         
-    #def testTwoNotEnoughCandidates(self):
-    #
-    #    election = Election()
-    #    election.ballot([1])
+    def testTwoNotEnoughCandidates(self):
+        election = Election()
+        election.ballot([1])
     
-    #    winners = election.runElection(2)
+        winners = election.runElection(2)
+        
+        self.assertFalse(winners)
         
     def testTwoBothAtThreshhold(self):
         election = Election()
@@ -102,3 +96,25 @@ class TestElectionMethods(unittest.TestCase):
         winners = election.runElection(2)
     
         self.assertEqual(winners,[1,2],"cannot find winner with only one at threshhold")
+        
+    def testSkipsCorrectly(self):
+        election = Election()
+        
+        election.ballot([1,2])
+        election.ballot([1])
+        election.ballot([1])
+        election.ballot([1])
+        election.ballot([1])
+        election.ballot([2,1])
+        election.ballot([2,4])
+        election.ballot([2])
+        election.ballot([3])
+        election.ballot([3])
+        election.ballot([3])
+        election.ballot([4,1,2])
+        election.ballot([5])
+        election.ballot([5])
+        
+        winners = election.runElection(3)
+        
+        self.assertEqual(winners,[1,2,3],"does not skip properly")
